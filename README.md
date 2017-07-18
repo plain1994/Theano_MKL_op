@@ -7,4 +7,5 @@ This repo uses Intel MKL to realize theano op like element wise add, element wis
 ```bash
 python test_mkl_add.py
 
+python test_mkl_mul.py
 ```
