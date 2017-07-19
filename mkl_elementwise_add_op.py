@@ -97,5 +97,10 @@ class ElementwiseAdd(gof.Op):
 
         return c_code % locals()
 
+    def grad(self, inp, grads):
+        x, y = inp
+        gz, = grads
+        return gz, gz
+
     def c_code_cache_version(self):
         return (1, 0, 0)

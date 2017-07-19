@@ -99,5 +99,10 @@ class ElementwiseMultiply(gof.Op):
 
         return c_code % locals()
 
+    def grad(self, inp, grads):
+        x, y = inp
+        gz, = grads
+        return ElementwiseMultiply()(gz, y), ElementwiseMultiply()(gz, x)
+
     def c_code_cache_version(self):
         return (1, 0, 0)
