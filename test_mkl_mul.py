@@ -151,7 +151,7 @@ class testMklAdd(unittest.TestCase):
         o = f(a, b)
         self.assertTrue(numpy.allclose(o, a*b))
 
-    def test_5D_dtensor(self):
+    def test_5D_ftensor(self):
         x = tensor.ftensor5('x')
         y = tensor.ftensor5('y')
 
