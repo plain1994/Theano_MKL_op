@@ -83,11 +83,7 @@ class ElementwiseMultiply(gof.Op):
         }
 
         //Get the number of elements to be calculated from PyArray_DIMS
-        int i;
-        int cal_num = 1;
-        for (i = 0; i < %(dim_x)s; i++){
-            cal_num *= PyArray_DIMS(%(x)s)[i];
-        }
+        int cal_num = PyArray_SIZE(%(x)s);
 
         //Perform the MKL Mul (elementwise mul)
         %(ccode_type)s *px = (%(ccode_type)s*)PyArray_DATA(%(x)s);
