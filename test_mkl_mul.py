@@ -203,6 +203,58 @@ class testMklAdd(unittest.TestCase):
         o = f(b, a)
         self.assertTrue(numpy.allclose(o, b*a))
 
+    def test_diff_dimensions_error1(self):
+        x = tensor.fmatrix('x')
+        y = tensor.ftensor4('y')
+
+        z = mkl_elementwise_mul_op.ElementwiseMultiply()(x, y)
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(7, 6).astype(numpy.float32)
+        b = numpy.random.rand(5, 6, 7, 7).astype(numpy.float32)
+
+        with self.assertRaises(ValueError):
+            f(a, b)
+
+    def test_same_dimensions_error2(self):
+        x = tensor.fvector('x')
+        y = tensor.fvector('y')
+
+        z = mkl_elementwise_mul_op.ElementwiseMultiply()(x, y)
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(8).astype(numpy.float32)
+        b = numpy.random.rand(7).astype(numpy.float32)
+
+        with self.assertRaises(ValueError):
+            f(a, b)
+
+    def test_same_dimensions_error3(self):
+        x = tensor.fmatrix('x')
+        y = tensor.fmatrix('y')
+
+        z = mkl_elementwise_mul_op.ElementwiseMultiply()(x, y)
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(7, 8).astype(numpy.float32)
+        b = numpy.random.rand(7, 6).astype(numpy.float32)
+
+        with self.assertRaises(ValueError):
+            f(a, b)
+
+    def test_same_dimensions_error4(self):
+        x = tensor.ftensor3('x')
+        y = tensor.ftensor3('y')
+
+        z = mkl_elementwise_mul_op.ElementwiseMultiply()(x, y)
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(6, 8, 7).astype(numpy.float32)
+        b = numpy.random.rand(7, 6, 7).astype(numpy.float32)
+
+        with self.assertRaises(ValueError):
+            f(a, b)
+
     def test_diff_type(self):
         pass
 
