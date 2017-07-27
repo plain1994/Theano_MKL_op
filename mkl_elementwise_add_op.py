@@ -92,6 +92,36 @@ class ElementwiseAdd(gof.Op):
             }
         }
 
+        //Validate that two inputs have same shape
+        //or same part of shape with diff dimensions
+        if (%(dim_x)s == %(dim_y)s){
+            for (int i = 0; i < %(dim_x)s; i++){
+                if (PyArray_DIMS(%(x)s)[i] != PyArray_DIMS(%(y)s)[i]){
+                    PyErr_Format(PyExc_ValueError, "Shape mismatch : "
+                        "x.shape and y.shape should match but "
+                        "x.shape[%%d] == %%i and y.shape[%%d] == %%i",
+                        i, PyArray_DIMS(%(x)s)[0],
+                        i, PyArray_DIMS(%(y)s)[0]);
+                    %(fail)s;
+                }
+            }
+        }else {
+            for (int i = 0; i < %(dim_min)s; i++){
+                if (PyArray_DIMS(%(min_input)s)[i] != PyArray_DIMS
+                (%(max_input)s)[i + %(dim_max)s - %(dim_min)s]){
+                    PyErr_Format(PyExc_ValueError, "Shape mismatch : "
+                        "x.shape and y.shape should match but "
+                        "x.shape[%%d] == %%i and y.shape[%%d] == %%i",
+                        i, PyArray_DIMS(%(min_input)s)[i],
+                        i + %(dim_min)s,
+                        PyArray_DIMS(%(max_input)s)
+                        [i + %(dim_max)s - %(dim_min)s]);
+                    %(fail)s;
+                }
+            }
+        }
+
+        //Computation
         if (%(dim_x)s == %(dim_y)s){
             //Get the number of elements from PyArray_SIZE
             int cal_num = PyArray_SIZE(%(x)s);
@@ -105,15 +135,14 @@ class ElementwiseAdd(gof.Op):
 
         }else{
             //calculate the computation times
-            int i;
             int loop_num = 1;
-            for (i = 0; i < %(dim_max)s - %(dim_min)s; i++){
+            for (int i = 0; i < %(dim_max)s - %(dim_min)s; i++){
                 loop_num *= PyArray_DIMS(%(max_input)s)[i];
             }
 
             //calculate the number of elements to be computed each time
             int cal_num = 1;
-            for (i = 0; i < %(dim_min)s; i++){
+            for (int i = 0; i < %(dim_min)s; i++){
                 cal_num *= PyArray_DIMS(%(min_input)s)[i];
             }
 
@@ -122,13 +151,12 @@ class ElementwiseAdd(gof.Op):
             %(c_type)s *pmin = (%(c_type)s*)PyArray_DATA(%(min_input)s);
             %(c_type)s *pz = (%(c_type)s*)PyArray_DATA(%(z)s);
 
-            for (i = 0; i < loop_num; i++){
+            for (int i = 0; i < loop_num; i++){
                 %(ccode_addfunc)s(cal_num, pmax, pmin, pz);
                 pmax += cal_num;
                 pz += cal_num;
             }
         }
-
         """
 
         return c_code % locals()
