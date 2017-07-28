@@ -1,5 +1,6 @@
 from theano import tensor, gof
 import numpy
+import theano
 
 
 class ElementwiseMultiply(gof.Op):
@@ -19,12 +20,9 @@ class ElementwiseMultiply(gof.Op):
         if inputs[1].ndim > 5:
             raise TypeError("ElementwiseMultiply: B's dimension is to large")
 
-        if inputs[0].dtype != inputs[1].dtype:
-            raise TypeError(
-                'ElementwiseMultiply: \
-                elements in A and B should have same dtype')
-
-        output_var = inputs[0].type()
+        output_var = theano.tensor.TensorType(
+                dtype=theano.scalar.upcast(inputs[0].dtype, inputs[1].dtype),
+                broadcastable=[False])()
 
         return gof.Apply(self, inputs, [output_var])
 
@@ -33,18 +31,22 @@ class ElementwiseMultiply(gof.Op):
         return headers
 
     def c_code(self, node, name, inputs, outputs, sub):
-        if node.inputs[0].dtype is 'float32':
-            c_type = 'float'
-            ccode_addfunc = 'vsMul'
-        elif node.inputs[0].dtype is 'float64':
+        x, y = inputs
+        z, = outputs
+
+        if (node.inputs[0].dtype is 'float64') or (node.inputs[1].dtype is 'float64'):
             c_type = 'double'
             ccode_addfunc = 'vdMul'
+            if (node.inputs[0].dtype is 'float32'):
+                x = x.astype('float64')
+            elif (node.inputs[1].dtype is 'float32'):
+                y = y.astype('float64')
+        elif (node.inputs[0].dtype is 'float32') and (node.inputs[1].dtype is 'float32'):
+            c_type = 'float'
+            ccode_addfunc = 'vsMul'
         else:
             raise TypeError('ElementwiseMultiply: dtype %s is not supported.'
                             % (node.inputs[0].dtype))
-
-        x, y = inputs
-        z, = outputs
 
         dim_x = node.inputs[0].ndim
         dim_y = node.inputs[1].ndim
@@ -67,10 +69,6 @@ class ElementwiseMultiply(gof.Op):
         dtype_x = node.inputs[0].dtype
         dtype_y = node.inputs[1].dtype
         dtype_z = node.outputs[0].dtype
-
-        itemsize_x = numpy.dtype(dtype_x).itemsize
-        itemsize_y = numpy.dtype(dtype_y).itemsize
-        itemsize_z = numpy.dtype(dtype_z).itemsize
 
         typenum_z = numpy.dtype(dtype_z).num
 
