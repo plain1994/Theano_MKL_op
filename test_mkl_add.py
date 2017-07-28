@@ -255,8 +255,33 @@ class testMklAdd(unittest.TestCase):
         with self.assertRaises(ValueError):
             f(a, b)
 
-    def test_diff_type(self):
-        pass
+    def test_diff_type1(self):
+        x = tensor.fvector('x')
+        y = tensor.dvector('y')
+
+        z = x + y
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(6).astype(numpy.float32)
+        b = numpy.random.rand(6).astype(numpy.float64)
+
+        o = f(a, b)
+
+        self.assertTrue(numpy.allclose(o, a+b))
+
+    def test_diff_type2(self):
+        x = tensor.fmatrix('x')
+        y = tensor.dmatrix('y')
+
+        z = x + y
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(6, 8).astype(numpy.float32)
+        b = numpy.random.rand(6, 8).astype(numpy.float64)
+
+        o = f(a, b)
+
+        self.assertTrue(numpy.allclose(o, a+b))
 
 
 if __name__ == '__main__':
