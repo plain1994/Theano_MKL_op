@@ -36,14 +36,14 @@ class ElementwiseAdd(gof.Op):
         convert_x = 0
         convert_y = 0
 
-        if (node.inputs[0].dtype is 'float64') or (node.inputs[1].dtype is 'float64'):
+        if node.inputs[0].dtype is 'float64' or node.inputs[1].dtype is 'float64':
             c_type = 'double'
             ccode_addfunc = 'vdAdd'
-            if (node.inputs[0].dtype is 'float32'):
+            if node.inputs[0].dtype is 'float32':
                 convert_x = 1
-            elif (node.inputs[1].dtype is 'float32'):
+            elif node.inputs[1].dtype is 'float32':
                 convert_y = 1
-        elif (node.inputs[0].dtype is 'float32') and (node.inputs[1].dtype is 'float32'):
+        elif node.inputs[0].dtype is 'float32' and node.inputs[1].dtype is 'float32':
             c_type = 'float'
             ccode_addfunc = 'vsAdd'
         else:
@@ -93,7 +93,7 @@ class ElementwiseAdd(gof.Op):
                 %(fail)s;
             }
         }
-        
+
         //Covert type if two inputs have different types
         if (%(convert_x)s == 1){
             %(x)s = (PyArrayObject*)PyArray_Cast(%(x)s ,PyArray_TYPE(%(y)s));

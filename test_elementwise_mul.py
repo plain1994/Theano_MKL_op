@@ -259,7 +259,7 @@ class testMklAdd(unittest.TestCase):
         x = tensor.fvector('x')
         y = tensor.dvector('y')
 
-        z = x + y
+        z = mkl_elementwise_mul.ElementwiseMultiply()(x, y)
         f = theano.function([x, y], z)
 
         a = numpy.random.rand(6).astype(numpy.float32)
@@ -267,13 +267,13 @@ class testMklAdd(unittest.TestCase):
 
         o = f(a, b)
 
-        self.assertTrue(numpy.allclose(o, a+b))
+        self.assertTrue(numpy.allclose(o, a*b))
 
     def test_diff_type2(self):
         x = tensor.fmatrix('x')
         y = tensor.dmatrix('y')
 
-        z = x + y
+        z = mkl_elementwise_mul.ElementwiseMultiply()(x, y)
         f = theano.function([x, y], z)
 
         a = numpy.random.rand(6, 8).astype(numpy.float32)
@@ -281,7 +281,33 @@ class testMklAdd(unittest.TestCase):
 
         o = f(a, b)
 
-        self.assertTrue(numpy.allclose(o, a+b))
+        self.assertTrue(numpy.allclose(o, a*b))
+
+    def test_diff_type_dimension(self):
+        x = tensor.fmatrix('x')
+        y = tensor.dtensor4('y')
+
+        z = mkl_elementwise_mul.ElementwiseMultiply()(y, x)
+        f = theano.function([y, x], z)
+
+        a = numpy.random.rand(7, 8).astype(numpy.float32)
+        b = numpy.random.rand(5, 6, 7, 8).astype(numpy.float64)
+
+        o = f(b, a)
+        self.assertTrue(numpy.allclose(o, b*a))
+
+    def test_diff_type_dimension2(self):
+        x = tensor.dmatrix('x')
+        y = tensor.ftensor4('y')
+
+        z = mkl_elementwise_mul.ElementwiseMultiply()(x, y)
+        f = theano.function([x, y], z)
+
+        a = numpy.random.rand(7, 8).astype(numpy.float64)
+        b = numpy.random.rand(5, 6, 7, 8).astype(numpy.float32)
+
+        o = f(a, b)
+        self.assertTrue(numpy.allclose(o, a*b))
 
 
 if __name__ == '__main__':
